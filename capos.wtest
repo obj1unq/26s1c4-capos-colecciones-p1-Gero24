@@ -1,0 +1,91 @@
+import capos.*
+
+describe "Parte 1 (referencias)" {
+  test "Rolando encuentra la espada del destino (la recolecta)" {
+
+    rolando.encontrar(espadaDelDestino)
+
+    assert.equals(rolando.encontrados(), [espadaDelDestino])
+    assert.equals(rolando.mochila(), [espadaDelDestino])
+  }
+
+  test "Rolando no recolecta mas artefactos que los que entran en su mochila" {
+
+    rolando.encontrar(espadaDelDestino)
+    rolando.encontrar(libroDeHechizos)
+    rolando.encontrar(collarDivino)
+
+    assert.equals([espadaDelDestino, libroDeHechizos, collarDivino], rolando.encontrados())
+    assert.equals([espadaDelDestino, libroDeHechizos], rolando.mochila())
+  }
+
+  test "Se puede configurar la capacidad de la mochila de Rolando" {
+
+    rolando.capacidadMochila(3)
+    rolando.encontrar(espadaDelDestino)
+    rolando.encontrar(libroDeHechizos)
+    rolando.encontrar(collarDivino)
+
+    assert.equals([espadaDelDestino, libroDeHechizos, collarDivino], rolando.mochila())
+  }
+}
+
+describe "Castillo de piedra" {
+  test "Rolando llega al castillo de piedra (deja en el castillo la espada y el libro de hechizos)" {
+    
+    rolando.encontrar(espadaDelDestino)
+    rolando.encontrar(libroDeHechizos)
+    rolando.llegarAlHogar()
+
+    assert.equals(castilloDePiedra.artefactosGuardados(), [espadaDelDestino, libroDeHechizos])
+    assert.that(rolando.mochila().isEmpty())
+
+  }
+  
+  test "Rolando encuentra el collar divino (ahora si lo puede recolectar, ya que liberó espacio)" {
+    
+    rolando.encontrar(espadaDelDestino)
+    rolando.encontrar(libroDeHechizos)
+    rolando.llegarAlHogar()
+
+    rolando.encontrar(collarDivino)
+    assert.equals([collarDivino], rolando.mochila())
+  }
+
+  test "Rolando llega al castillo de piedra nuevamente (deja el collar, con lo cual ahora el castillo tiene el collar, la espada y el libro)" {
+    
+    rolando.encontrar(espadaDelDestino)
+    rolando.encontrar(libroDeHechizos)
+    rolando.llegarAlHogar()
+    rolando.encontrar(collarDivino)
+
+    rolando.llegarAlHogar()
+
+    assert.equals([espadaDelDestino, libroDeHechizos, collarDivino], castilloDePiedra.artefactosGuardados())
+  }
+}
+
+describe "Saber qué artefactos tiene Rolando" {
+  test "Saber las posesiones de Rolando" {
+    
+    rolando.encontrar(espadaDelDestino)
+    rolando.encontrar(libroDeHechizos)
+    rolando.llegarAlHogar()
+    rolando.encontrar(collarDivino)
+    rolando.encontrar(armaduraDeAceroValyrio)
+    
+    assert.equals([espadaDelDestino, libroDeHechizos, collarDivino, armaduraDeAceroValyrio], rolando.posesiones())
+
+  }
+
+  test "Saber si Rolando posee un artefacto en particular" {
+
+    rolando.encontrar(espadaDelDestino)
+    rolando.encontrar(libroDeHechizos)
+    rolando.llegarAlHogar()
+    rolando.encontrar(collarDivino)
+    rolando.encontrar(armaduraDeAceroValyrio)
+
+    assert.that(rolando.poseeArtefacto(armaduraDeAceroValyrio))
+  }
+}
