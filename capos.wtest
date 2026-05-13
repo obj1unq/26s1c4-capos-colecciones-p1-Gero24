@@ -89,3 +89,97 @@ describe "Saber qué artefactos tiene Rolando" {
     assert.that(rolando.poseeArtefacto(armaduraDeAceroValyrio))
   }
 }
+
+describe "Comportamiento de los artefactos" {
+  test "Hacer que Rolando tenga 5 de base y capacidad de 3 artefactos. Entre sus artefactos se encuentran la espada (que le aporta 5), ​​la armadura (aporta 6) y el collar (aporta 3)." {
+    
+    rolando.poderBase(5)
+    rolando.capacidadMochila(3)
+    rolando.encontrar(espadaDelDestino)
+    rolando.encontrar(armaduraDeAceroValyrio)
+    rolando.encontrar(collarDivino)
+
+    assert.equals(19, rolando.poder())
+  }
+
+  test "Luego de la primera batalla Rolando tiene 6 de base, la espada (aporta 6/2 = 3), la armadura (aporta 6) y el collar (aporta 3)" {
+    rolando.poderBase(5)
+    rolando.capacidadMochila(3)
+    rolando.encontrar(espadaDelDestino)
+    rolando.encontrar(armaduraDeAceroValyrio)
+    rolando.encontrar(collarDivino)
+    rolando.batallar()
+
+    assert.equals(18, rolando.poder())
+  }
+  
+  test "Luego de la segunda batalla Rolando tiene 7 de base, la espada (aporta 7/2 = 3.5), la armadura 6 y el collar (3+2=5)" {
+    rolando.poderBase(5)
+    rolando.capacidadMochila(3)
+    rolando.encontrar(espadaDelDestino)
+    rolando.encontrar(armaduraDeAceroValyrio)
+    rolando.encontrar(collarDivino)
+    rolando.batallar()
+    rolando.batallar()
+
+    assert.equals(21.5, rolando.poder())
+  }
+
+  test "Luego de la tercera batalla Rolando tiene 8 de base, la espada (aporta 8/2=4), la armadura 6 y el collar (3+3=6)" {
+    rolando.poderBase(5)
+    rolando.capacidadMochila(3)
+    rolando.encontrar(espadaDelDestino)
+    rolando.encontrar(armaduraDeAceroValyrio)
+    rolando.encontrar(collarDivino)
+    rolando.batallar()
+    rolando.batallar()
+    rolando.batallar()
+
+    assert.equals(24, rolando.poder())
+
+  }
+}
+
+describe "Libro de hechizos" {
+  test "Antes de la primera batalla, el libro de hechizos aporta 4 de la bendición." {
+    rolando.encontrar(libroDeHechizos)
+
+    assert.equals(4, libroDeHechizos.poder())
+  }
+
+  test "Luego de la primera batalla el libro de hechizos aporta 6 por la invisibilidad." {
+    rolando.encontrar(libroDeHechizos)
+    rolando.batallar()
+
+    assert.equals(6, libroDeHechizos.poder())
+  }
+
+  test "Luego de la segunda batalla, el libro aporta 7, ya que la invocación otorga los 7 puntos de la espada." {
+
+    rolando.poderBase(5)
+    rolando.encontrar(espadaDelDestino)
+    rolando.encontrar(armaduraDeAceroValyrio)
+    rolando.encontrar(collarDivino)
+    rolando.llegarAlHogar()
+    rolando.encontrar(libroDeHechizos)
+    rolando.batallar()
+    rolando.batallar()
+
+    assert.equals(7, libroDeHechizos.poder())
+  }
+
+  test "Luego de la tercera batalla, ya no quedan más hechizos, por lo que el aporte del libro es 0" {
+
+    rolando.poderBase(5)
+    rolando.encontrar(espadaDelDestino)
+    rolando.encontrar(armaduraDeAceroValyrio)
+    rolando.encontrar(collarDivino)
+    rolando.llegarAlHogar()
+    rolando.encontrar(libroDeHechizos)
+    rolando.batallar()
+    rolando.batallar()
+    rolando.batallar()
+
+    assert.equals(0, libroDeHechizos.poder())
+  }
+}
