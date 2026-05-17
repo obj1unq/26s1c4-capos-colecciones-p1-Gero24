@@ -1,19 +1,25 @@
+import moradas.*
+import enemigos.*
+
 object rolando {
   const artefactosEnMochila = []
   var capacidadMaximaMochila = 2
   const artefactosEncontrados = []
   var property hogar =  castilloDePiedra
   var property poderBase = 5
+  const enemigosDeErethia = #{caterina, archibaldo, astra}
 
-  method encontrados() = artefactosEncontrados
+  method enemigos() = enemigosDeErethia
 
-  method mochila() = artefactosEnMochila
+  method historialDeEncuentros() = artefactosEncontrados
+
+  method artefactosEnMochila() = artefactosEnMochila
   
-  method capacidadMochila(capacidad) {
+  method establecerCapacidadMochila(capacidad) {
     capacidadMaximaMochila = capacidad
   }
   
-  method encontrar(artefacto) {
+  method encontrarseCon(artefacto) {
     artefactosEncontrados.add(artefacto)
     self.recolectar(artefacto)
   }
@@ -35,10 +41,10 @@ object rolando {
 
   method poseeArtefacto(artefacto) = self.posesiones().contains(artefacto)
 
-  method poder() = poderBase + artefactosEnMochila.sum({artefacto => artefacto.poder()})
+  method poderDePelea() = poderBase + artefactosEnMochila.sum({artefacto => artefacto.poderPara(self)})
 
   method batallar() {
-    artefactosEnMochila.forEach({artefacto => artefacto.incrementarBatalla()})
+    artefactosEnMochila.forEach({artefacto => artefacto.usarEnBatalla()})
     self.incrementarPoderBase()
   }
 
@@ -46,64 +52,73 @@ object rolando {
     poderBase = poderBase + 1
   }
 
-  method artefactoMasPoderosoEnElHogar() = hogar.poderDeArtefactoMasPoderoso()
+  method poderDelArtefactoMasPoderosoEnElHogar() = hogar.poderDelArtefactoMasPoderoso(self)
+
+  method puedeVencerA(unEnemigo) = unEnemigo.poderDePelea() < self.poderDePelea()
+
+  method enemigosQuePuedoVencer() = enemigosDeErethia.filter({unEnemigo => self.puedeVencerA(unEnemigo)})
+
+  method esPoderoso() = enemigosDeErethia.all({unEnemigo => self.puedeVencerA(unEnemigo)})
+
+  method moradasConquistables() = self.enemigosQuePuedoVencer().map({enemigo => enemigo.morada()}).asSet()
+
+  method esFatalPara(artefacto, unEnemigo) = artefacto.poderPara(self) > unEnemigo.poderDePelea()
+
+  method tieneUnArtefactoFatalPara(unEnemigo) = artefactosEnMochila.any({artefacto => self.esFatalPara(artefacto, unEnemigo)})
+
+  method artefactoFatalPara(unEnemigo) = artefactosEnMochila.find({artefacto => artefacto.poderPara(self) > unEnemigo.poderDePelea()})
+  
 }
 
 object espadaDelDestino {
-  var property heroe = rolando
   var property batallas = 0
   
-  method poder() {
+  method poderPara(unHeroe) {
     if (batallas == 0) {
-      return heroe.poderBase()
+      return unHeroe.poderBase()
     } else {
-      return heroe.poderBase() / 2 
+      return unHeroe.poderBase() / 2 
     }
   }
 
-  method incrementarBatalla() {
+  method usarEnBatalla() {
     batallas = batallas + 1
   }
 }
 
 object collarDivino {
-  var property heroe = rolando
   var property batallas = 0
 
-  method poder() {
-    if (heroe.poderBase() > 6) {
+  method poderPara(unHeroe) {
+    if (unHeroe.poderBase() > 6) {
       return 3 + (batallas * 1)
     } else {
       return 3 
     }
   }
-  method incrementarBatalla() {
+
+  method usarEnBatalla() {
     batallas = batallas + 1
   }
 }
 
 object armaduraDeAceroValyrio {
 
-  var property heroe = rolando
-  var property batallas = 0
+  method poderPara(unHeroe) = 6
 
-  method poder() = 6
-
-  method incrementarBatalla() {
-    batallas = batallas + 1
+  method usarEnBatalla() {
+    // No hace nada
   }
 }
 
 object libroDeHechizos {
-  var property heroe = rolando
-  var property batallas = 0
-  var property hechizos = [bendicion,invisibilidad,invocación]
+  var property hechizos = [bendicion,invisibilidad,invocacion]
 
-  method poder() {
+  method poderPara(unHeroe) {
     if (hechizos.isEmpty()) {
       return 0
     } else {
-      return hechizos.first().aporteMagico()
+      return hechizos.first().aporteMagicoPara(unHeroe)
     }
   }
 
@@ -112,8 +127,7 @@ object libroDeHechizos {
   }
 
 
-  method incrementarBatalla() {
-    batallas = batallas + 1
+  method usarEnBatalla() {
     self.usarPrimerHechizo()
   }
 
@@ -121,42 +135,15 @@ object libroDeHechizos {
 
 object bendicion {
 
-  method aporteMagico() = 4
+  method aporteMagicoPara(unHeroe) = 4
   
 }
 
 object invisibilidad {
-  method aporteMagico() {
-    const heroePosedor = libroDeHechizos.heroe()
-    return heroePosedor.poderBase()
-  }
+  method aporteMagicoPara(unHeroe) = unHeroe.poderBase()
   
 }
 
-object invocación {
-  method aporteMagico() {
-    const heroePosedor = libroDeHechizos.heroe()
-    return heroePosedor.artefactoMasPoderosoEnElHogar()
-  }
+object invocacion {
+  method aporteMagicoPara(unHeroe) = unHeroe.poderDelArtefactoMasPoderosoEnElHogar()
 }
-object castilloDePiedra {
-
-  const inventario = []
-
-  method artefactosGuardados() = inventario
-
-  method guardarArtefactos(artefactos) {
-    inventario.addAll(artefactos)
-  }
-
-  method poderDeArtefactoMasPoderoso() {
-
-    if(inventario.isEmpty()) {
-      return 0
-    } else {
-      const artefactoMasPoderoso = inventario.max({artefacto => artefacto.poder()})
-      return artefactoMasPoderoso.poder()
-    }
-  }
-}
-
