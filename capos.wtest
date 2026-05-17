@@ -1,0 +1,206 @@
+import capos.*
+import moradas.*
+import enemigos.*
+
+object estadoInicial {
+  method prepararConEspadaArmaduraYCollarYPoderBase(unPoderBase) {
+    rolando.poderBase(unPoderBase)
+    rolando.establecerCapacidadMochila(3)
+    rolando.encontrarseCon(espadaDelDestino)
+    rolando.encontrarseCon(armaduraDeAceroValyrio)
+    rolando.encontrarseCon(collarDivino)
+  }
+}
+
+describe "Parte 1 (referencias)" {
+  test "Rolando encuentra la espada del destino (la recolecta)" {
+
+    rolando.encontrarseCon(espadaDelDestino)
+
+    assert.equals(rolando.historialDeEncuentros(), [espadaDelDestino])
+    assert.equals(rolando.artefactosEnMochila(), [espadaDelDestino])
+  }
+
+  test "Rolando no recolecta mas artefactos que los que entran en su mochila" {
+
+    rolando.encontrarseCon(espadaDelDestino)
+    rolando.encontrarseCon(libroDeHechizos)
+    rolando.encontrarseCon(collarDivino)
+
+    assert.equals([espadaDelDestino, libroDeHechizos, collarDivino], rolando.historialDeEncuentros())
+    assert.equals([espadaDelDestino, libroDeHechizos], rolando.artefactosEnMochila())
+  }
+
+  test "Se puede configurar la capacidad de la mochila de Rolando" {
+
+    rolando.establecerCapacidadMochila(3)
+    rolando.encontrarseCon(espadaDelDestino)
+    rolando.encontrarseCon(libroDeHechizos)
+    rolando.encontrarseCon(collarDivino)
+
+    assert.equals([espadaDelDestino, libroDeHechizos, collarDivino], rolando.artefactosEnMochila())
+  }
+}
+
+describe "Castillo de piedra" {
+  test "Rolando llega al castillo de piedra (deja en el castillo la espada y el libro de hechizos)" {
+    
+    rolando.encontrarseCon(espadaDelDestino)
+    rolando.encontrarseCon(libroDeHechizos)
+    rolando.llegarAlHogar()
+
+    assert.equals(castilloDePiedra.artefactosGuardados(), [espadaDelDestino, libroDeHechizos])
+    assert.that(rolando.artefactosEnMochila().isEmpty())
+
+  }
+  
+  test "Rolando encuentra el collar divino (ahora si lo puede recolectar, ya que liberó espacio)" {
+    
+    rolando.encontrarseCon(espadaDelDestino)
+    rolando.encontrarseCon(libroDeHechizos)
+    rolando.llegarAlHogar()
+
+    rolando.encontrarseCon(collarDivino)
+    assert.equals([collarDivino], rolando.artefactosEnMochila())
+  }
+
+  test "Rolando llega al castillo de piedra nuevamente (deja el collar, con lo cual ahora el castillo tiene el collar, la espada y el libro)" {
+    
+    rolando.encontrarseCon(espadaDelDestino)
+    rolando.encontrarseCon(libroDeHechizos)
+    rolando.llegarAlHogar()
+    rolando.encontrarseCon(collarDivino)
+
+    rolando.llegarAlHogar()
+
+    assert.equals([espadaDelDestino, libroDeHechizos, collarDivino], castilloDePiedra.artefactosGuardados())
+  }
+}
+
+describe "Saber qué artefactos tiene Rolando" {
+  test "Saber las posesiones de Rolando" {
+    
+    rolando.encontrarseCon(espadaDelDestino)
+    rolando.encontrarseCon(libroDeHechizos)
+    rolando.llegarAlHogar()
+    rolando.encontrarseCon(collarDivino)
+    rolando.encontrarseCon(armaduraDeAceroValyrio)
+    
+    assert.equals([espadaDelDestino, libroDeHechizos, collarDivino, armaduraDeAceroValyrio], rolando.posesiones())
+
+  }
+
+  test "Saber si Rolando posee un artefacto en particular" {
+
+    rolando.encontrarseCon(espadaDelDestino)
+    rolando.encontrarseCon(libroDeHechizos)
+    rolando.llegarAlHogar()
+    rolando.encontrarseCon(collarDivino)
+    rolando.encontrarseCon(armaduraDeAceroValyrio)
+
+    assert.that(rolando.poseeArtefacto(armaduraDeAceroValyrio))
+  }
+}
+
+describe "Comportamiento de los artefactos" {
+  test "Hacer que Rolando tenga 5 de base y capacidad de 3 artefactos. Entre sus artefactos se encuentran la espada (que le aporta 5), ​​la armadura (aporta 6) y el collar (aporta 3)." {
+    estadoInicial.prepararConEspadaArmaduraYCollarYPoderBase(5)
+
+    assert.equals(19, rolando.poderDePelea())
+  }
+
+  test "Luego de la primera batalla Rolando tiene 6 de base, la espada (aporta 6/2 = 3), la armadura (aporta 6) y el collar (aporta 3)" {
+    estadoInicial.prepararConEspadaArmaduraYCollarYPoderBase(5)
+    rolando.batallar()
+
+    assert.equals(18, rolando.poderDePelea())
+  }
+  
+  test "Luego de la segunda batalla Rolando tiene 7 de base, la espada (aporta 7/2 = 3.5), la armadura 6 y el collar (3+2=5)" {
+    estadoInicial.prepararConEspadaArmaduraYCollarYPoderBase(5)
+    rolando.batallar()
+    rolando.batallar()
+
+    assert.equals(21.5, rolando.poderDePelea())
+  }
+
+  test "Luego de la tercera batalla Rolando tiene 8 de base, la espada (aporta 8/2=4), la armadura 6 y el collar (3+3=6)" {
+    estadoInicial.prepararConEspadaArmaduraYCollarYPoderBase(5)
+    rolando.batallar()
+    rolando.batallar()
+    rolando.batallar()
+
+    assert.equals(24, rolando.poderDePelea())
+
+  }
+}
+
+describe "Libro de hechizos" {
+  test "Antes de la primera batalla, el libro de hechizos aporta 4 de la bendición." {
+    rolando.encontrarseCon(libroDeHechizos)
+
+    assert.equals(4, libroDeHechizos.poderPara(rolando))
+  }
+
+  test "Luego de la primera batalla el libro de hechizos aporta 6 por la invisibilidad." {
+    rolando.encontrarseCon(libroDeHechizos)
+    rolando.batallar()
+
+    assert.equals(6, libroDeHechizos.poderPara(rolando))
+  }
+
+  test "Luego de la segunda batalla, el libro aporta 7, ya que la invocación otorga los 7 puntos de la espada." {
+    estadoInicial.prepararConEspadaArmaduraYCollarYPoderBase(5)
+    rolando.llegarAlHogar()
+    rolando.encontrarseCon(libroDeHechizos)
+    rolando.batallar()
+    rolando.batallar()
+
+    assert.equals(7, libroDeHechizos.poderPara(rolando))
+  }
+
+  test "Luego de la tercera batalla, ya no quedan más hechizos, por lo que el aporte del libro es 0" {
+    estadoInicial.prepararConEspadaArmaduraYCollarYPoderBase(5)
+    rolando.llegarAlHogar()
+    rolando.encontrarseCon(libroDeHechizos)
+    rolando.batallar()
+    rolando.batallar()
+    rolando.batallar()
+
+    assert.equals(0, libroDeHechizos.poderPara(rolando))
+  }
+}
+
+describe "Enemigos" {
+  test "Suponiendo que Rolando tiene 5 de base y capacidad de 3 artefactos. Entre sus artefactos se encuentran la espada (que le aporta 5), la armadura (aporta 6) y el collar (aporta 3). Su poder de batalla es 19, por lo tanto, puede vencer a Archibaldo y a Astra. Las moradas conquistables son el palacio de mármol y la torre de marfil" {
+    estadoInicial.prepararConEspadaArmaduraYCollarYPoderBase(5)
+
+    rolando.enemigosQuePuedoVencer()
+
+    assert.equals(19, rolando.poderDePelea())
+    assert.equals(#{archibaldo, astra}, rolando.enemigosQuePuedoVencer())
+    assert.equals(#{palacioDeMarmol, torreDeMarfil}, rolando.moradasConquistables())
+    assert.notThat(rolando.esPoderoso())
+  }
+}
+
+describe "Poderoso" {
+  test "Se considera que Rolando es poderoso en la tierra de Erethia si está en condiciones de vencer a todos los enemigos." {
+    estadoInicial.prepararConEspadaArmaduraYCollarYPoderBase(10)
+    rolando.enemigosQuePuedoVencer()
+
+    assert.equals(#{archibaldo, astra, caterina}, rolando.enemigosQuePuedoVencer())
+    assert.that(rolando.esPoderoso())
+  }
+}
+
+describe "Artefacto fatal" {
+  test "Saber si Rolando posee consigo un artefacto fatal para enfrentar un enemigo" {
+    estadoInicial.prepararConEspadaArmaduraYCollarYPoderBase(15)
+
+    assert.that(rolando.tieneUnArtefactoFatalPara(astra))
+    assert.equals(espadaDelDestino, rolando.artefactoFatalPara(astra))
+    assert.notThat(rolando.tieneUnArtefactoFatalPara(caterina))
+  }
+  
+}
